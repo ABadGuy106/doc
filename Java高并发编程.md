@@ -1,0 +1,270 @@
+# Java高并发编程
+
+## 基本概念
+
+### 并发：
+
+同时拥有两个或者多个线程，如果程序在单核处理器上运行，多个线程将交替地换入或者换出内存，这些线程是同时"存在"的，每个线程都处于执行过程中的某个状态，如果运行在多核处理器上，此时，程序中的每个线程都将分配到一个处理器核上，因此可以同时运行
+
+### 高并发：
+
+是互联网分布式系统架构设计中必须考虑的因素之一，它通常是指，通过设计保证系统能够同时并行处理很多请求
+
+## 并发编程基础
+
+
+
+## 线程安全性
+
+#### 定义：
+
+当多个线程访问某个类时，不管运行时环境采用何种调度方式或者这些进程将如何交替执行，并且在主调代码中不需要任何额外的同步或协同，这个类都能表现出正确的行为，那么就称这个类时线程安全的。
+
+#### 线程安全性：
+
+原子性：提供了互斥访问，同一时刻只能有一个线程来对它进行操作
+
+​	涉及到jdk的  Atomic包
+
+##### AtomicXXX: CAS、Unsafe.compareAndSwapInt
+
+```java
+count.incrementAndGet();
+
+public class AtomicInteger extends Number implements java.io.Serializable {
+  /**
+     * Atomically increments by one the current value.
+     *
+     * @return the updated value
+     */
+    public final int incrementAndGet() {
+        return unsafe.getAndAddInt(this, valueOffset, 1) + 1;
+    }
+}
+
+
+public final class Unsafe {
+  
+  	/**
+  	*  var1  当前对象，即调用对象 count
+  	*  var2  当前值，例如2+1  当前值为  2
+  	*  var4  增加量
+  	**/
+      public final int getAndAddInt(Object var1, long var2, int var4) {
+        int var5;
+        do {
+            var5 = this.getIntVolatile(var1, var2);
+        } while(!this.compareAndSwapInt(var1, var2, var5, var5 + var4));
+
+        return var5;
+    }
+  
+}
+```
+
+​	（2）AtomicLong、LongAdder
+
+| AtomicLong                                                   | LongAdder                                              |
+| ------------------------------------------------------------ | ------------------------------------------------------ |
+|                                                              | 在统计的时候如果有并发更新，可能会导致统计的数据有误差 |
+| 如果在序列号生成或者要求很精确的情况下，必须使用全局唯一的AtomicLong | 高并发性能比AtomicLong强                               |
+| 在线程竞争很低的情况使用AtomicLong更简单，效率更高一些       | 在实际处理中在高并发状态下可以优先使用LongAdder        |
+
+ ![atomic包下的类](/home/last/%E6%96%87%E6%A1%A3/doc/image/atomic.PNG)
+
+
+
+可见性：一个线程对主内存的修改可以及时的被其他线程观察到
+
+有序性：一个线程观察其他线程中的指令执行顺序，由于指令重排序的存在，该观察结果一般杂乱无序
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -231,7 +231,7 @@ location = patt{
 
 样例配置
 
-图片所在目录:  /usr/local/nginx/image/image
+图片所在目录:  /usr/local/nginx/image/image/dev/sdb
 
 ```
 location ~ image{
@@ -239,6 +239,77 @@ location ~ image{
      index index.html;
  }
 ```
+
+## rewrite重写
+
+#### rewrite规则常用命令：
+
+if(条件) { } 设定条件，再进行重写
+
+set #设置变量
+
+return #返回状态码
+
+break #跳出rewrite
+
+rewrite  #重写
+
+#### if　语法格式
+
+```
+if 空格 (条件){
+	重写格式
+}
+```
+
+条件写法:
+
+1. ​	"＝"来判断相等，用于字符串比较
+2. ​	"~"　用正则来匹配（此处的正则区分大小写）~*　不区分大小写
+3. ​	"-f -d -e" 来判断是否为文件，为目录，是否存在
+
+例：
+
+等于号用法（当地址172.20.10.13访问时，返回状态码403）
+
+```properties
+location / {
+            if ($remote_addr = 172.20.10.13) {
+                return 403;
+            }
+            root   html;
+            index  index.html index.htm;
+        }
+```
+
+#### 正则表达式用法
+
+```por
+        location / {
+            if ($http_user_agent ~* chrome) {
+                rewrite ^.*$ /chrome.html;
+            }
+            root   html;
+            index  index.html index.htm;
+        }
+```
+
+当使用上边的方式配置的时候，使用chrom浏览器访问，会匹配到/chrom.html页面，请求会被重定向到chrome.html页面。此时请求的浏览器还是chrome，所以该段代码还会被匹配到，这样就会造成无限死循环，所以此时使用chrom.html会报错500,应该添加break，跳出循环
+
+应该使用该配置:
+
+```properties
+        location / {
+            if ($http_user_agent ~* chrome) {
+                rewrite ^.*$ /chrome.html;
+                break;
+            }
+            root   html;
+            index  index.html index.htm;
+        }
+```
+
+
 
 
 
