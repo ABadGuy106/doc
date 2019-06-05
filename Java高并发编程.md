@@ -109,13 +109,37 @@ public final class Unsafe {
 - ​	对象所有于都是final类型
 - ​	对象是正确创建的（在对象创建期间，this引用没有逸出）
 
+将集合转换为不可修改集合
 
+Collections.unmodifiableXXX : Collection、List、Set、Map ...
 
+Guava: ImmutableXXX : Collection、List、Set 、Map ...
 
+#### 线程封闭
 
+Ad-hoc 线程封闭：程序控制实现，最糟糕，忽略
 
+堆栈封闭：局部变量，无并发问题
 
+ThreadLocal 线程封闭：特别好的封闭方法
 
+#### 常见线程不安全类与写法
+
+StringBuilder -> StringBuffer
+
+SimpleDateFormat -> JodaTime
+
+ArrayList、HashSet、HashMap等Collections
+
+先检查再执行：if(condition(a)){handle(a);}
+
+#### 同步容器
+
+ArrayList 	->	 Vector,Stack
+
+HashMap	->	HashTable(key,value不能为null)
+
+Collections.synchronizedXXX(List、Set、Map)
 
 
 
