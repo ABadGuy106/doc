@@ -64,19 +64,88 @@ public final class Unsafe {
 
 ​	（2）AtomicLong、LongAdder
 
-| AtomicLong                                                   | LongAdder                                              |
-| ------------------------------------------------------------ | ------------------------------------------------------ |
-|                                                              | 在统计的时候如果有并发更新，可能会导致统计的数据有误差 |
-| 如果在序列号生成或者要求很精确的情况下，必须使用全局唯一的AtomicLong | 高并发性能比AtomicLong强                               |
-| 在线程竞争很低的情况使用AtomicLong更简单，效率更高一些       | 在实际处理中在高并发状态下可以优先使用LongAdder        |
+| AtomicLong                              | LongAdder                    |
+| --------------------------------------- | ---------------------------- |
+|                                         | 在统计的时候如果有并发更新，可能会导致统计的数据有误差  |
+| 如果在序列号生成或者要求很精确的情况下，必须使用全局唯一的AtomicLong | 高并发性能比AtomicLong强            |
+| 在线程竞争很低的情况使用AtomicLong更简单，效率更高一些        | 在实际处理中在高并发状态下可以优先使用LongAdder |
 
- ![atomic包下的类](/home/last/%E6%96%87%E6%A1%A3/doc/image/atomic.PNG)
+ ![atomic包下的类](image/atomic.PNG)
 
+AtomicReference、AtomicReferenceFieldUpdater
 
+##### AtomicStampReference: CAS的ABA问题
 
-可见性：一个线程对主内存的修改可以及时的被其他线程观察到
+ABA问题：
 
-有序性：一个线程观察其他线程中的指令执行顺序，由于指令重排序的存在，该观察结果一般杂乱无序
+​	当一个线程要操作某个变量时，首先拿到该变量值为A当这个线程对该变量进行操作时，另一个线程拿到该变量并将该变量值修改为B后，又修改回了A。这时第一个线程回来发现这个变量的值还是A没有改变，所以做了其他操作。
+
+​	解决办法：当第一个线程拿到该变量时为其设置版本号1，第二个线程将变量A改为B时，变量版本号变为2，当第二个线程将变量由B改为A的时候，变量版本变为3。当第一个线程回来时发现版本号不是1则表示变量已经被修改
+
+```java
+public class AtomicStampedReference<V> {
+  /**
+     * Atomically sets the value of both the reference and stamp
+     * to the given update values if the
+     * current reference is {@code ==} to the expected reference
+     * and the current stamp is equal to the expected stamp.
+     *
+     * @param expectedReference the expected value of the reference
+     * @param newReference the new value for the reference
+     * @param expectedStamp the expected value of the stamp
+     * @param newStamp the new value for the stamp
+     * @return {@code true} if successful
+     */
+    public boolean compareAndSet(V   expectedReference,
+                                 V   newReference,
+                                 int expectedStamp,
+                                 int newStamp) {
+        Pair<V> current = pair;
+        return
+            expectedReference == current.reference &&
+            expectedStamp == current.stamp &&
+            ((newReference == current.reference &&
+              newStamp == current.stamp) ||
+             casPair(current, Pair.of(newReference, newStamp)));
+    }
+}
+```
+
+##### 原子性-锁
+
+​	synchronized: 依赖JVM    同步锁
+
+​		synchronized的对象主要由四种：
+
+​			修饰代码块（同步语句块）：大括号括起来的代码，作用于调用的对象
+
+​			修饰方法（同步方法）：整个方法，作用于调用的对象
+
+​			修饰静态方法：整个静态方法，作用于所有对象
+
+​			修饰类：括号括起来的部分，作用于所有对象
+
+​		ps:如果某个类的方法用syschronized关键字修饰，另一个类继承该类的时候，不继承该方法的syschronized关键	字。	因为synchronized不属于方法声明的一部分。如果子类要使用syschronized需要自己显示的在方法上声明synchronized。
+
+​	synchronized:不可中断锁，适合竞争不激烈，可读性好
+
+​	Lock:可中断锁，多样化同步，竞争激烈时能维持常态
+
+​	Atomic:竞争激烈时能维持常态，比Lock性能好；只能同步一个值
+
+##### Lock : 依赖特殊的CPU指令，代码实现，ReentrantLock
+
+#### 可见性：一个线程对主内存的修改可以及时的被其他线程观察到
+
+导致共享变量在线程间不可见的原因：
+
+- 线程交叉执行
+- 重排序结合线程交叉执行
+- 共享变量更新后的值没有在工作内存于主存间及时更新
+
+重排序
+
+#### 有序性：一个线程观察其他线程中的指令执行顺序，由于指令重排序的存在，该观察结果一般杂乱无序
 
 
 
@@ -106,8 +175,8 @@ public final class Unsafe {
 不可变对象需要满足的条件：
 
 - ​	对象创建以后其状态就不能修改
-- ​	对象所有于都是final类型
-- ​	对象是正确创建的（在对象创建期间，this引用没有逸出）
+  - ​对象所有于都是final类型
+  - ​对象是正确创建的（在对象创建期间，this引用没有逸出）
 
 将集合转换为不可修改集合
 
