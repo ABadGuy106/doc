@@ -204,7 +204,7 @@ ArrayList、HashSet、HashMap等Collections
 
 #### 同步容器
 
-ArrayList 	->	 Vector,Stack
+ArrayList 	->	 Vector（其实就是一个List与ArrayList十分相似只不过它的所有方法都用synchronised修饰了）,Stack（继承于Vector,就是数据结构【算法】中的栈，先进后出）
 
 HashMap	->	HashTable(key,value不能为null)
 
